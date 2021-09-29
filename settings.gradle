@@ -1,0 +1,3 @@
+include ':asocket'
+include ':app'
+rootProject.name = "ASocket"
