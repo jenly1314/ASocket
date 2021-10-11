@@ -20,12 +20,11 @@ import java.net.DatagramPacket;
  *
  * 通过 ASocket 统一管理 TCP/UDP 相关 Socket，让其适用于 Android，在 UI主线程调用，在子线程处理发送消息
  *
- * @param <T> T表示原始的Socket对象
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>
  */
-public class ASocket<T> implements ISocket<T>{
+public class ASocket implements ISocket<Object>{
 
-    private ISocket<T> mSocket;
+    private ISocket mSocket;
 
     private OnMessageReceivedListener mOnMessageReceivedListener;
 
@@ -96,7 +95,7 @@ public class ASocket<T> implements ISocket<T>{
      *
      * @param socket {@link ISocket}
      */
-    public ASocket(ISocket<T> socket){
+    public ASocket(ISocket socket){
         this.mSocket = socket;
         mHandlerThread.start();
     }
@@ -104,7 +103,7 @@ public class ASocket<T> implements ISocket<T>{
 
 
     @Override
-    public T getSocket() {
+    public Object getSocket() {
         if(mSocket != null){
             return mSocket.getSocket();
         }
@@ -147,7 +146,7 @@ public class ASocket<T> implements ISocket<T>{
             LogUtils.d("Client has not started");
             return;
         }
-        processMessage(WHAT_SEND_MESSAGE,data);
+        mWorkHandler.obtainMessage(WHAT_SEND_MESSAGE,BYTE_DATA_MESSAGE, 0, data).sendToTarget();
     }
 
     @Override
@@ -156,7 +155,7 @@ public class ASocket<T> implements ISocket<T>{
             LogUtils.d("Client has not started");
             return;
         }
-        processMessage(WHAT_SEND_MESSAGE,data);
+        mWorkHandler.obtainMessage(WHAT_SEND_MESSAGE,DATAGRAM_PACKET_MESSAGE, 0,data).sendToTarget();
     }
 
     @Override
@@ -166,28 +165,9 @@ public class ASocket<T> implements ISocket<T>{
 
             @Override
             public void onMessageReceived(byte[] data) {
-                processMessage(WHAT_RECEIVE_MESSAGE,data);
+                mMainHandler.obtainMessage(WHAT_RECEIVE_MESSAGE,data).sendToTarget();
             }
         });
-    }
-
-    private void processMessage(int what, DatagramPacket data){
-        switch (what){
-            case WHAT_SEND_MESSAGE:
-                mWorkHandler.obtainMessage(what,DATAGRAM_PACKET_MESSAGE, 0,data).sendToTarget();
-                break;
-        }
-    }
-
-    private void processMessage(int what, byte[] data){
-        switch (what){
-            case WHAT_SEND_MESSAGE:
-                mWorkHandler.obtainMessage(what,BYTE_DATA_MESSAGE, 0, data).sendToTarget();
-                break;
-            case WHAT_RECEIVE_MESSAGE:
-                mMainHandler.obtainMessage(what,data).sendToTarget();
-                break;
-        }
     }
 
 }

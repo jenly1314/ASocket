@@ -21,41 +21,6 @@ ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接�
 > 你也可以直接下载 [演示App](https://raw.githubusercontent.com/jenly1314/ASocket/master/app/release/app-release.apk) 体验效果
 
 
-## 引入
-
-### Maven：
-```maven
-<dependency>
-  <groupId>com.king.asocket</groupId>
-  <artifactId>asocket</artifactId>
-  <version>1.0.0</version>
-  <type>pom</type>
-</dependency>
-```
-### Gradle:
-```gradle
-//AndroidX 版本
-implementation 'com.king.asocket:asocket:1.0.0'
-
-```
-### Lvy:
-```lvy
-<dependency org='com.king.asocket' name='asocket' rev='1.0.0'>
-  <artifact name='$AID' ext='pom'></artifact>
-</dependency>
-```
-
-
-
-###### 如果Gradle出现compile失败的情况，可以在Project的build.gradle里面添加如下：（也可以使用上面的JitPack来compile）
-```gradle
-allprojects {
-    repositories {
-        //...
-        maven { url 'https://dl.bintray.com/jenly/maven' }
-    }
-}
-```
 
 ## 示例
 
