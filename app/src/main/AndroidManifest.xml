@@ -23,9 +23,18 @@
         <activity android:name=".tcp.TCPClientActivity"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".tcp.TCPServerActivity"
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".udp.UDPClientActivity"
             android:screenOrientation="portrait"/>
+
+        <activity android:name=".udp.UDPMulticastActivity"
+            android:screenOrientation="portrait"/>
+
+        <activity android:name=".udp.UDPServerActivity"
+            android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>

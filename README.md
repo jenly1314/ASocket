@@ -1,18 +1,16 @@
 # ASocket
 
-![Image](app/src/main/ic_launcher-playstore.png)
-
 [![Download](https://img.shields.io/badge/download-App-blue.svg)](https://raw.githubusercontent.com/jenly1314/ASocket/master/app/release/app-release.apk)
-[![JCenter](https://img.shields.io/badge/JCenter-1.0.0-46C018.svg)](https://bintray.com/beta/#/jenly/maven/asocket)
+[![MavenCentral](https://img.shields.io/maven-central/v/com.github.jenly1314/asocket)](https://repo1.maven.org/maven2/com/github/jenly1314/asocket)
 [![JitPack](https://jitpack.io/v/jenly1314/ASocket.svg)](https://jitpack.io/#jenly1314/ASocket)
-[![CI](https://travis-ci.org/jenly1314/ASocket.svg?branch=master)](https://travis-ci.org/jenly1314/ASocket)
+[![CI](https://travis-ci.com/jenly1314/ASocket.svg?branch=master)](https://travis-ci.com/jenly1314/ASocket)
 [![CircleCI](https://circleci.com/gh/jenly1314/ASocket.svg?style=svg)](https://circleci.com/gh/jenly1314/ASocket)
 [![API](https://img.shields.io/badge/API-16%2B-blue.svg?style=flat)](https://android-arsenal.com/api?level=16)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/mit-license.php)
 [![Blog](https://img.shields.io/badge/blog-Jenly-9933CC.svg)](https://jenly1314.github.io/)
 [![QQGroup](https://img.shields.io/badge/QQGroup-20867961-blue.svg)](http://shang.qq.com/wpa/qunwpa?idkey=8fcc6a2f88552ea44b1411582c94fd124f7bb3ec227e2a400dbbfaad3dc2f5ad)
 
-ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接、UDP的单播、组播、广播等相关通信。
+ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接与UDP的单播、组播、广播等相关通信。
 
 
 ## Gif 展示
@@ -21,24 +19,39 @@ ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接�
 > 你也可以直接下载 [演示App](https://raw.githubusercontent.com/jenly1314/ASocket/master/app/release/app-release.apk) 体验效果
 
 
-
 ## 示例
 
+#### TCPClient
+[TCPClientActivity](app/src/main/java/com/king/asocket/app/tcp/TCPClientActivity.kt)
+
+#### TCPServer
+[TCPServerActivity](app/src/main/java/com/king/asocket/app/tcp/TCPServerActivity.kt)
+
+#### UDPClient
+[UDPClientActivity](app/src/main/java/com/king/asocket/app/udp/UDPClientActivity.kt)
+
+#### UDPServer
+[UDPServerActivity](app/src/main/java/com/king/asocket/app/udp/UDPServerActivity.kt)
+
+#### UDPMulticast
+[UDPMulticastActivity](app/src/main/java/com/king/asocket/app/udp/UDPMulticastActivity.kt)
 
 
-TCPClient
-```java
+## 特别说明
+
+#### 组播IP地址特别说明
+>  多播的地址是特定的，D类地址用于多播。D类IP地址就是多播IP地址，即224.0.0.0至239.255.255.255之间的IP地址，并被划分为局部连接多播地址、预留多播地址和管理权限多播地址3类：
+>  局部多播地址：在224.0.0.0～224.0.0.255之间，这是为路由协议和其他用途保留的地址，路由器并不转发属于此范围的IP包。
+>  预留多播地址：在224.0.1.0～238.255.255.255之间，可用于全球范围（如Internet）或网络协议。
+>  管理权限多播地址：在239.0.0.0～239.255.255.255之间，可供组织内部使用，类似于私有IP地址，不能用于Internet，可限制多播范围。
 
 
-```
-
-
-更多使用详情，请查看[Demo](app)中的源码使用示例或直接查看[API帮助文档](https://jenly1314.github.io/projects/ASocket/doc/)
+更多使用详情，请查看[Demo](app)中的源码使用示例或直接查看[API帮助文档](https://jitpack.io/com/github/jenly1314/ASocket/latest/javadoc/)
 
 
 ## 版本记录
 
-#### v1.0.0：2020-9-13
+#### v1.0.0：2021-10-13
 *  ASocket初始版本
 
 ## 赞赏

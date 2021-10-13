@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -21,16 +22,21 @@ import java.util.concurrent.TimeUnit;
  */
 public class TCPServer implements ISocket<ServerSocket> {
 
+    private final Object mLock = new Object();
+
     private ServerSocket mServer;
 
     private int mBacklog;
 
     private int mPort;
 
-    private boolean isStart;
+    private volatile boolean isStart;
+
+    private boolean isConnected;
 
     private Map<String,Socket> cacheClient;
 
+    private OnSocketStateListener mOnSocketStateListener;
     private OnMessageReceivedListener mOnMessageReceivedListener;
 
     private Executor mExecutor;
@@ -59,15 +65,32 @@ public class TCPServer implements ISocket<ServerSocket> {
         return mServer;
     }
 
-    /**
-     * 如果要设置，需在 {@link #start()} 之前才有效
-     * @param executor
-     */
+    @Override
     public void setExecutor(Executor executor) {
-        if(isStart()){
+        if(isStart){
             return;
         }
         this.mExecutor = executor;
+    }
+
+    private Executor obtainExecutor(){
+        if(mExecutor == null){
+            synchronized (mLock){
+                if(mExecutor == null){
+                    mExecutor = new ThreadPoolExecutor(5, mBacklog,
+                            0L, TimeUnit.MILLISECONDS,
+                            new LinkedBlockingQueue<Runnable>());
+                }
+            }
+        }
+        return mExecutor;
+    }
+
+    @Override
+    public ServerSocket createSocket() throws Exception {
+        ServerSocket serverSocket = new ServerSocket(mPort,mBacklog);
+        serverSocket.setReuseAddress(true);
+        return serverSocket;
     }
 
     @Override
@@ -75,51 +98,77 @@ public class TCPServer implements ISocket<ServerSocket> {
         if(isStart()){
             return;
         }
-        try {
-            mServer = new ServerSocket(mPort,mBacklog);
-            mPort = mServer.getLocalPort();
-            LogUtils.d(String.format("localAddress:%s:%d",mServer.getInetAddress().getHostAddress(),mServer.getLocalPort()));
-            mServer.setReuseAddress(true);
-            createExecutor();
-            if(!cacheClient.isEmpty()){
-                cacheClient.clear();
-            }
-            isStart = mServer.isBound();
-            while (isStart()){
-                Socket socket = mServer.accept();
-                processSocketTask(mExecutor,socket);
-            }
-            mServer.close();
-        } catch (Exception e) {
-            isStart = false;
-            e.printStackTrace();
-        }
-    }
+        LogUtils.d("start...");
+        isStart = true;
+        obtainExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mServer = createSocket();
+                    mPort = mServer.getLocalPort();
+                    isConnected = true;
+                    LogUtils.d(String.format("localAddress:%s:%d",mServer.getInetAddress().getHostAddress(),mServer.getLocalPort()));
+                    if(!cacheClient.isEmpty()){
+                        cacheClient.clear();
+                    }
+                    if(mOnSocketStateListener != null){
+                        mOnSocketStateListener.onStarted();
+                    }
+                    while (isStart()){
+                        try{
+                            Socket socket = mServer.accept();
+                            processSocketTask(mExecutor,socket);
+                        }catch (SocketException e){
+                            if(isClosed()){
+                                break;
+                            }
+                        }
+                    }
+                    close();
+                    LogUtils.d("TCPServer close.");
+                    if(mOnSocketStateListener != null){
+                        mOnSocketStateListener.onClosed();
+                    }
+                } catch (Exception e) {
+                    isConnected = false;
+                    isStart = false;
+                    LogUtils.w(e);
+                    if(mOnSocketStateListener != null){
+                        mOnSocketStateListener.onException(e);
+                    }
+                }
 
-    private void createExecutor(){
-        if(mExecutor == null){
-            mExecutor = new ThreadPoolExecutor(5, mBacklog,
-                    0L, TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<Runnable>());
-        }
+            }
+        });
+
     }
 
     @Override
     public void close() {
         try {
+            cacheClient.clear();
+            isConnected = false;
+            isStart = false;
             if(!isClosed()){
                 mServer.close();
             }
-            isStart = false;
-            cacheClient.clear();
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.w(e);
+            if(mOnSocketStateListener != null){
+                mOnSocketStateListener.onException(e);
+            }
         }
     }
 
     @Override
     public boolean isStart() {
         return mServer != null && isStart && !mServer.isClosed();
+    }
+
+
+    @Override
+    public boolean isConnected() {
+        return mServer != null && isConnected && mServer.isBound();
     }
 
     @Override
@@ -150,11 +199,11 @@ public class TCPServer implements ISocket<ServerSocket> {
                         LogUtils.d("write:" + new String(data));
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    LogUtils.w(e);
+                    if(mOnSocketStateListener != null){
+                        mOnSocketStateListener.onException(e);
+                    }
                 }
-            }
-            if(!isStart()){
-                break;
             }
         }
     }
@@ -186,7 +235,10 @@ public class TCPServer implements ISocket<ServerSocket> {
                             LogUtils.d("write:" + new String(value));
                         }
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LogUtils.w(e);
+                        if(mOnSocketStateListener != null){
+                            mOnSocketStateListener.onException(e);
+                        }
                     }
                 }
                 return;
@@ -194,6 +246,11 @@ public class TCPServer implements ISocket<ServerSocket> {
         }
 
         write(value);
+    }
+
+    @Override
+    public void setOnSocketStateListener(OnSocketStateListener listener) {
+        mOnSocketStateListener = listener;
     }
 
     @Override
@@ -237,7 +294,10 @@ public class TCPServer implements ISocket<ServerSocket> {
             inputStream.close();
             socket.close();
         }catch (Exception e){
-            e.printStackTrace();
+            LogUtils.w(e);
+            if(mOnSocketStateListener != null){
+                mOnSocketStateListener.onException(e);
+            }
         }
     }
 }

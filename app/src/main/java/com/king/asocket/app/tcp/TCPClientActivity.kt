@@ -3,18 +3,21 @@ package com.king.asocket.app.tcp
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import com.king.asocket.ASocket
+import com.king.asocket.ISocket
 import com.king.asocket.app.R
 import com.king.asocket.app.databinding.ActivityTcpClientBinding
-import com.king.asocket.udp.UDPClient
+import com.king.asocket.tcp.TCPClient
 import com.king.asocket.util.LogUtils
-import java.net.DatagramSocket
+import java.lang.Exception
 
 /**
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>
  */
-class TCPClientActivity() : AppCompatActivity() {
+class TCPClientActivity : AppCompatActivity() {
 
     val binding by lazy {
         ActivityTcpClientBinding.inflate(layoutInflater)
@@ -22,14 +25,17 @@ class TCPClientActivity() : AppCompatActivity() {
 
     var mHost = "192.168.1.101"
 
-    var mPort = 9007
+    var mPort = 9001
 
-    var aSocket: ASocket<DatagramSocket>? = null
+    var aSocket: ASocket? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        title = "TCP Client"
         binding.etHost.setText(mHost)
         binding.etPort.setText(mPort.toString())
 
@@ -40,23 +46,58 @@ class TCPClientActivity() : AppCompatActivity() {
         super.onDestroy()
     }
 
+    private fun getContext() = this
+
     private fun clickStart(){
-//        if(aSocket?.isStart == true){
-//            System.out.println("start")
-//        }else{
         mHost = binding.etHost.text.toString()
         mPort = binding.etPort.text.toString().toInt()
-        val client = UDPClient(mHost,mPort)
+        val client = TCPClient(mHost,mPort)
         aSocket = ASocket(client)
-        aSocket?.start()
-        LogUtils.d("start...")
-//        }
+        aSocket?.let {
+            it.setOnSocketStateListener(object : ISocket.OnSocketStateListener{
+                override fun onStarted() {
+                    binding.btnStart.isEnabled = false
+                    binding.etHost.isEnabled = false
+                    binding.etPort.isEnabled = false
+                    binding.progressBar.isVisible = false
+                    binding.btnStart.text = "已连接"
+                }
+
+                override fun onClosed() {
+
+                }
+
+                override fun onException(e: Exception) {
+
+                    if(!it.isConnected){//连接失败
+                        LogUtils.d("连接失败")
+                        Toast.makeText(getContext(),"连接失败",Toast.LENGTH_SHORT).show()
+                        binding.btnStart.isEnabled = true
+                        binding.etHost.isEnabled = true
+                        binding.etPort.isEnabled = true
+                        binding.progressBar.isVisible = false
+                        binding.btnStart.text = "连接"
+                    }
+                }
+
+            })
+            it.setOnMessageReceivedListener { data ->
+                binding.tvContent.append("接收：${String(data)}\n")
+            }
+            binding.progressBar.isVisible = true
+            it.start()
+
+        }
     }
 
     private fun clickSend(){
         if(!TextUtils.isEmpty(binding.etContent.text)){
             aSocket?.let {
-                it.write(binding.etContent.text.toString().toByteArray())
+                val data = binding.etContent.text.toString()
+                it.write(data.toByteArray())
+                if(it.isStart){
+                    binding.tvContent.append("发送：${data}\n")
+                }
                 binding.etContent.setText("")
             }
         }
@@ -71,7 +112,6 @@ class TCPClientActivity() : AppCompatActivity() {
             R.id.btnStart -> clickStart()
             R.id.btnSend -> clickSend()
             R.id.btnClear -> clickClear()
-
         }
     }
 }

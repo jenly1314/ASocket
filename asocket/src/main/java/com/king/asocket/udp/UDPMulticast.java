@@ -6,12 +6,17 @@ import com.king.asocket.util.LogUtils;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 /**
  * UDP组播
  * @author <a href="mailto:jenly1314@gmail.com">Jenly</a>
  */
 public class UDPMulticast implements ISocket<MulticastSocket> {
+
+    private final Object mLock = new Object();
 
     private MulticastSocket mSocket;
 
@@ -25,8 +30,10 @@ public class UDPMulticast implements ISocket<MulticastSocket> {
 
     private boolean isStart;
 
-
+    private OnSocketStateListener mOnSocketStateListener;
     private OnMessageReceivedListener mOnMessageReceivedListener;
+
+    private Executor mExecutor;
 
     /**
      * 构造
@@ -55,48 +62,101 @@ public class UDPMulticast implements ISocket<MulticastSocket> {
     }
 
     @Override
+    public void setExecutor(Executor executor) {
+        if(isStart){
+            return;
+        }
+        this.mExecutor = executor;
+    }
+
+    private Executor obtainExecutor(){
+        if(mExecutor == null){
+            synchronized (mLock){
+                if(mExecutor == null){
+                    mExecutor = Executors.newSingleThreadExecutor();
+                }
+            }
+        }
+        return mExecutor;
+    }
+
+    @Override
+    public MulticastSocket createSocket() throws Exception {
+        MulticastSocket socket = new MulticastSocket(mPort);
+        socket.setReuseAddress(true);
+        return socket;
+    }
+
+    @Override
     public void start() {
         if(isStart()){
             return;
         }
-        try {
-            mSocket = new MulticastSocket(mPort);
-            mInetAddress = InetAddress.getByName(mHost);
-            mPort = mSocket.getLocalPort();
-            LogUtils.d(String.format("localAddress:%s:%d",mSocket.getLocalAddress().getHostAddress(),mPort));
-            mSocket.setReuseAddress(true);
-            mSocket.joinGroup(mInetAddress);
-            LogUtils.d(String.format("Join group:%s:%d",mHost,mPort));
-            isStart = mSocket.isBound();
-            while (isStart()){
-                DatagramPacket data = new DatagramPacket(new byte[mLength],mLength);
-                mSocket.receive(data);
-                byte[] value = new byte[data.getLength() - data.getOffset()];
-                System.arraycopy(data.getData(),data.getOffset(),value,0,value.length);
-                if(LogUtils.isShowLog()){
-                    LogUtils.d("Received:"  + new String(value));
-                }
-                if(mOnMessageReceivedListener != null){
-                    mOnMessageReceivedListener.onMessageReceived(value);
+        LogUtils.d("start...");
+        isStart = true;
+        obtainExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mSocket = createSocket();
+                    mInetAddress = InetAddress.getByName(mHost);
+                    mPort = mSocket.getLocalPort();
+                    LogUtils.d(String.format("localAddress:%s:%d",mSocket.getLocalAddress().getHostAddress(),mPort));
+                    mSocket.joinGroup(mInetAddress);
+                    LogUtils.d(String.format("Join group:%s:%d",mHost,mPort));
+                    if(mOnSocketStateListener != null){
+                        mOnSocketStateListener.onStarted();
+                    }
+                    while (isStart()){
+                        DatagramPacket data = new DatagramPacket(new byte[mLength],mLength);
+                        try {
+                            mSocket.receive(data);
+                        }catch (SocketException e){
+                            if(isClosed()){
+                                break;
+                            }
+                        }
+                        byte[] value = new byte[data.getLength() - data.getOffset()];
+                        System.arraycopy(data.getData(),data.getOffset(),value,0,value.length);
+                        if(LogUtils.isShowLog()){
+                            LogUtils.d("Received:"  + new String(value));
+                        }
+                        if(mOnMessageReceivedListener != null){
+                            mOnMessageReceivedListener.onMessageReceived(value);
+                        }
+                    }
+                    if(!isClosed()){
+                        mSocket.leaveGroup(InetAddress.getByName(mHost));
+                        LogUtils.d("Leave group:" + mHost + ":" + mPort);
+                    }
+                    close();
+                    LogUtils.d("UDPMulticast close.");
+                    if(mOnSocketStateListener != null){
+                        mOnSocketStateListener.onClosed();
+                    }
+                } catch (Exception e) {
+                    isStart = false;
+                    LogUtils.w(e);
+                    if(mOnSocketStateListener != null){
+                        mOnSocketStateListener.onException(e);
+                    }
                 }
             }
-            mSocket.leaveGroup(InetAddress.getByName(mHost));
-            mSocket.close();
-        } catch (Exception e) {
-            isStart = false;
-            e.printStackTrace();
-        }
+        });
     }
 
     @Override
     public void close() {
         try{
+            isStart = false;
             if(!isClosed()){
                 mSocket.close();
             }
-            isStart = false;
         }catch (Exception e){
-            e.printStackTrace();
+            LogUtils.w(e);
+            if(mOnSocketStateListener != null){
+                mOnSocketStateListener.onException(e);
+            }
         }
 
     }
@@ -104,6 +164,11 @@ public class UDPMulticast implements ISocket<MulticastSocket> {
     @Override
     public boolean isStart() {
         return mSocket != null && isStart && !mSocket.isClosed();
+    }
+
+    @Override
+    public boolean isConnected() {
+        return mSocket != null && mSocket.isConnected();
     }
 
     @Override
@@ -134,7 +199,10 @@ public class UDPMulticast implements ISocket<MulticastSocket> {
                 LogUtils.d("write:" + new String(data));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.w(e);
+            if(mOnSocketStateListener != null){
+                mOnSocketStateListener.onException(e);
+            }
         }
     }
 
@@ -152,8 +220,16 @@ public class UDPMulticast implements ISocket<MulticastSocket> {
                 LogUtils.d("write:" + new String(value));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtils.w(e);
+            if(mOnSocketStateListener != null){
+                mOnSocketStateListener.onException(e);
+            }
         }
+    }
+
+    @Override
+    public void setOnSocketStateListener(OnSocketStateListener listener) {
+        mOnSocketStateListener = listener;
     }
 
     @Override

@@ -2,7 +2,7 @@
 //    id 'com.android.library'
 //}
 apply plugin: "com.android.library"
-//apply plugin: "com.vanniktech.maven.publish"
+apply plugin: "com.vanniktech.maven.publish"
 
 android {
     compileSdkVersion build_versions.compileSdk
