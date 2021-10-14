@@ -12,6 +12,7 @@
 
 ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接与UDP的单播、组播、广播等相关通信。
 
+> 通过 ASocket 统一管理 TCP/UDP 相关 Socket，让其适用于Android，在UI主线程调用和回调，在子线程异步处理消息的发送与接收
 
 ## Gif 展示
 ![Image](GIF.gif)
@@ -20,6 +21,44 @@ ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接�
 
 
 ## 示例
+
+### 主要用法示例
+```kotlin
+    //初始化一个ISocket的实现类（如：TCPClient、TCPServer、UDPClient、UDPServer、UDPMulticast）
+    val tcpClient = TCPClient(host,port)
+    //初始化ASocket
+    val aSocket = ASocket(tcpClient)
+    //设置状态监听
+    aSocket.setOnSocketStateListener(object : ISocket.OnSocketStateListener{
+        override fun onStarted() {
+
+        }
+    
+        override fun onClosed() {
+    
+        }
+    
+        override fun onException(e: Exception) {
+
+        }
+    
+    })
+    //设置接收消息监听
+    aSocket.setOnMessageReceivedListener { data ->
+        //TODO 接收消息
+    }
+    //启动
+    aSocket.start()
+
+
+
+    //....
+    //发送消息
+    aSocket.write(data)
+
+```
+
+### 完整示例
 
 #### TCPClient
 [TCPClientActivity](app/src/main/java/com/king/asocket/app/tcp/TCPClientActivity.kt)
@@ -48,6 +87,10 @@ ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接�
 
 更多使用详情，请查看[Demo](app)中的源码使用示例或直接查看[API帮助文档](https://jitpack.io/com/github/jenly1314/ASocket/latest/javadoc/)
 
+
+### 相关推荐
+
+#### [ANetty](https://github.com/jenly1314/ANetty) 基于Netty封装的Android链路通讯库，用以快速开发高性能，高可靠性的网络交互。在保证易于开发的同时还保证其应用的性能，稳定性和伸缩性。
 
 ## 版本记录
 
