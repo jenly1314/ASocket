@@ -19,6 +19,27 @@ ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接�
 
 > 你也可以直接下载 [演示App](https://raw.githubusercontent.com/jenly1314/ASocket/master/app/release/app-release.apk) 体验效果
 
+## 引入
+
+### Gradle:
+
+1. 在Project的 **build.gradle** 里面添加远程仓库
+
+```gradle
+allprojects {
+    repositories {
+        //...
+        mavenCentral()
+    }
+}
+```
+
+2. 在Module的 **build.gradle** 里面添加引入依赖项
+```gradle
+implementation 'com.github.jenly1314:asocket:1.0.0'
+
+```
+
 
 ## 示例
 
