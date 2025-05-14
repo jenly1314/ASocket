@@ -1,18 +1,17 @@
 # ASocket
 
-[![Download](https://img.shields.io/badge/download-App-blue.svg)](https://raw.githubusercontent.com/jenly1314/ASocket/master/app/release/app-release.apk)
-[![MavenCentral](https://img.shields.io/maven-central/v/com.github.jenly1314/asocket)](https://repo1.maven.org/maven2/com/github/jenly1314/asocket)
-[![JitPack](https://jitpack.io/v/jenly1314/ASocket.svg)](https://jitpack.io/#jenly1314/ASocket)
-[![CI](https://travis-ci.com/jenly1314/ASocket.svg?branch=master)](https://travis-ci.com/jenly1314/ASocket)
-[![CircleCI](https://circleci.com/gh/jenly1314/ASocket.svg?style=svg)](https://circleci.com/gh/jenly1314/ASocket)
-[![API](https://img.shields.io/badge/API-16%2B-blue.svg?style=flat)](https://android-arsenal.com/api?level=16)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/mit-license.php)
+[![MavenCentral](https://img.shields.io/maven-central/v/com.github.jenly1314/asocket?logo=sonatype)](https://repo1.maven.org/maven2/com/github/jenly1314/ASocket)
+[![JitPack](https://img.shields.io/jitpack/v/github/jenly1314/ASocket?logo=jitpack)](https://jitpack.io/#jenly1314/ASocket)
+[![CI](https://img.shields.io/github/actions/workflow/status/jenly1314/ASocket/build.yml?logo=github)](https://github.com/jenly1314/ASocket/actions/workflows/build.yml)
+[![Download](https://img.shields.io/badge/download-APK-brightgreen?logo=github)](https://raw.githubusercontent.com/jenly1314/ASocket/master/app/release/app-release.apk)
+[![API](https://img.shields.io/badge/API-16%2B-brightgreen?logo=android)](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels)
+[![License](https://img.shields.io/github/license/jenly1314/ASocket?logo=open-source-initiative)](https://opensource.org/licenses/mit)
 
 ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接与UDP的单播、组播、广播等相关通信。
 
 > 通过 ASocket 统一管理 TCP/UDP 相关 Socket，让其适用于Android，在UI主线程调用和回调，在子线程异步处理消息的发送与接收
 
-## Gif 展示
+## 效果展示
 ![Image](GIF.gif)
 
 > 你也可以直接下载 [演示App](https://raw.githubusercontent.com/jenly1314/ASocket/master/app/release/app-release.apk) 体验效果
@@ -30,7 +29,7 @@ ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接�
     }
     ```
 
-2. 在Module的 **build.gradle** 里面添加引入依赖项
+2. 在Module的 **build.gradle** 中添加依赖项
     ```gradle
     implementation 'com.github.jenly1314:asocket:1.0.0'
     
@@ -83,55 +82,29 @@ ASocket 是一个TCP/UDP协议的封装库，方便快速实现TCP的长连接�
 
 ### 完整示例
 
-#### TCPClient
-[TCPClientActivity](app/src/main/java/com/king/asocket/app/tcp/TCPClientActivity.kt)
+- TCPClient示例：[TCPClientActivity](app/src/main/java/com/king/asocket/app/tcp/TCPClientActivity.kt)
 
-#### TCPServer
-[TCPServerActivity](app/src/main/java/com/king/asocket/app/tcp/TCPServerActivity.kt)
+- TCPServer示例：[TCPServerActivity](app/src/main/java/com/king/asocket/app/tcp/TCPServerActivity.kt)
 
-#### UDPClient
-[UDPClientActivity](app/src/main/java/com/king/asocket/app/udp/UDPClientActivity.kt)
+- UDPClient示例：[UDPClientActivity](app/src/main/java/com/king/asocket/app/udp/UDPClientActivity.kt)
 
-#### UDPServer
-[UDPServerActivity](app/src/main/java/com/king/asocket/app/udp/UDPServerActivity.kt)
+- UDPServer示例：[UDPServerActivity](app/src/main/java/com/king/asocket/app/udp/UDPServerActivity.kt)
 
-#### UDPMulticast
-[UDPMulticastActivity](app/src/main/java/com/king/asocket/app/udp/UDPMulticastActivity.kt)
+- UDPMulticast示例：[UDPMulticastActivity](app/src/main/java/com/king/asocket/app/udp/UDPMulticastActivity.kt)
 
 更多使用详情，请查看[Demo](app)中的源码使用示例或直接查看[API帮助文档](https://jitpack.io/com/github/jenly1314/ASocket/latest/javadoc/)
 
 ## 相关推荐
 
-#### [ANetty](https://github.com/jenly1314/ANetty) 基于Netty封装的Android链路通讯库，用以快速开发高性能，高可靠性的网络交互。在保证易于开发的同时还保证其应用的性能，稳定性和伸缩性。
-#### [AWebSocket](https://github.com/jenly1314/AWebSocket) 基于okhttp封装的 WebSocket，简洁易用。
+- [ANetty](https://github.com/jenly1314/ANetty) 基于Netty封装的Android链路通讯库，用以快速开发高性能，高可靠性的网络交互。在保证易于开发的同时还保证其应用的性能，稳定性和伸缩性。
+- [AWebSocket](https://github.com/jenly1314/AWebSocket) 基于okhttp封装的 WebSocket，简洁易用。
 
-## 版本记录
+## 版本日志
 
 #### v1.0.0：2021-10-13
 *  ASocket初始版本
 
-## 赞赏
-如果你喜欢ASocket，或感觉ASocket帮助到了你，可以点右上角“Star”支持一下，你的支持就是我的动力，谢谢 :smiley:<p>
-<p>您也可以扫描下面的二维码，请作者喝杯咖啡 :coffee:
+---
 
-<div>
-   <img src="https://jenly1314.github.io/image/page/rewardcode.png">
-</div>
+![footer](https://jenly1314.github.io/page/footer.svg)
 
-## 关于我
-
-| 我的博客                                                                                | GitHub                                                                                  | Gitee                                                                                  | CSDN                                                                                 | 博客园                                                                            |
-|:------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------------|:-------------------------------------------------------------------------------|
-| <a title="我的博客" href="https://jenly1314.github.io" target="_blank">Jenly's Blog</a> | <a title="GitHub开源项目" href="https://github.com/jenly1314" target="_blank">jenly1314</a> | <a title="Gitee开源项目" href="https://gitee.com/jenly1314" target="_blank">jenly1314</a>  | <a title="CSDN博客" href="http://blog.csdn.net/jenly121" target="_blank">jenly121</a>  | <a title="博客园" href="https://www.cnblogs.com/jenly" target="_blank">jenly</a>  |
-
-## 联系我
-
-| 微信公众号        | Gmail邮箱                                                                          | QQ邮箱                                                                              | QQ群                                                                                                                       | QQ群                                                                                                                       |
-|:-------------|:---------------------------------------------------------------------------------|:----------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------|:--------------------------------------------------------------------------------------------------------------------------|
-| [Jenly666](http://weixin.qq.com/r/wzpWTuPEQL4-ract92-R) | <a title="给我发邮件" href="mailto:jenly1314@gmail.com" target="_blank">jenly1314</a> | <a title="给我发邮件" href="mailto:jenly1314@vip.qq.com" target="_blank">jenly1314</a> | <a title="点击加入QQ群" href="https://qm.qq.com/cgi-bin/qm/qr?k=6_RukjAhwjAdDHEk2G7nph-o8fBFFzZz" target="_blank">20867961</a> | <a title="点击加入QQ群" href="https://qm.qq.com/cgi-bin/qm/qr?k=Z9pobM8bzAW7tM_8xC31W8IcbIl0A-zT" target="_blank">64020761</a> |
-
-<div>
-   <img src="https://jenly1314.github.io/image/page/footer.png">
-</div>
-
-   
